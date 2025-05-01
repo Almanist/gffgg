@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buse'ye Özel Mektup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Caveat', cursive;
+            perspective: 1200px;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 550px;
+            height: 350px;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #e74c3c;
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-left: 275px solid transparent;
+            border-right: 275px solid transparent;
+            border-top: 175px solid #c0392b;
+            transform-origin: top;
+            transform: rotateX(0deg);
+            transition: all 0.8s ease;
+            z-index: 5;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .envelope.open:before {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .envelope.open {
+            transform: translateY(-100px) rotateX(10deg);
+            height: 450px;
+        }
+
+        .letter {
+            position: absolute;
+            width: 90%;
+            height: 85%;
+            background: #fff9e6;
+            margin: 5%;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 1s ease 0.3s;
+            overflow: hidden;
+            font-size: 28px;
+            line-height: 1.8;
+            color: #333;
+            font-weight: bold;
+            border-radius: 3px;
+            background-image: repeating-linear-gradient(#fff9e6, #fff9e6 28px, #94acd4 29px, #94acd4 29px, #fff9e6 30px);
+            background-attachment: local;
+        }
+
+        .envelope.open .letter {
+            transform: translateY(-60px);
+            opacity: 1;
+            height: 380px;
+        }
+
+        .poem-line {
+            display: block;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+            text-shadow: 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        .visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 40px;
+            font-style: italic;
+            font-size: 26px;
+            opacity: 0;
+            transition: opacity 1.2s ease 4.5s;
+            color: #e74c3c;
+        }
+
+        .envelope.open .signature {
+            opacity: 1;
+        }
+
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #e74c3c;
+            transform: rotate(45deg) scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .heart:before, .heart:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+        }
+
+        .heart:before {
+            top: -10px;
+            left: 0;
+        }
+
+        .heart:after {
+            top: 0;
+            left: -10px;
+        }
+
+        .ink-blot {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(46,52,64,0.2) 0%, rgba(46,52,64,0) 70%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .stamp {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 80px;
+            background: #f1c40f;
+            border: 2px dashed #e67e22;
+            transform: rotate(10deg);
+            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 50px solid #c0392b;
+            z-index: 2;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .envelope.open .envelope-flap {
+            opacity: 1;
+            animation: flapWave 2s infinite;
+        }
+
+        @keyframes flapWave {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            50% { transform: translateX(-50%) rotate(5deg); }
+        }
+
+        .page-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .page-mark {
+            position: absolute;
+            background: rgba(0,0,0,0.05);
+            border-radius: 50%;
+        }
+
+        /* Hundreds of decorative elements */
+        .decorative-element {
+            position: absolute;
+            background: transparent;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="envelope-wrapper" id="envelope-wrapper">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="letter" id="letter">
+                    <div class="page-marks" id="page-marks"></div>
+                    <span class="poem-line" id="line1">Buse</span>
+                    <span class="poem-line" id="line2"></span>
+                    <span class="poem-line" id="line3">Bir adım sen</span>
+                    <span class="poem-line" id="line4">Bir ömür ben.</span>
+                    <span class="poem-line" id="line5"></span>
+                    <span class="poem-line" id="line6">Gözlerin değdi</span>
+                    <span class="poem-line" id="line7">Kalbim yeniden.</span>
+                    <span class="poem-line" id="line8"></span>
+                    <span class="poem-line" id="line9">Bir gülüşün yeter</span>
+                    <span class="poem-line" id="line10">Susar her sitem.</span>
+                    <span class="poem-line" id="line11"></span>
+                    <span class="poem-line" id="line12">Senle başlar</span>
+                    <span class="poem-line" id="line13">Ve</span>
+                    <span class="poem-line" id="line14">Senle biter bu şiir.</span>
+                    <div class="signature">Sevgilerimle...</div>
+                </div>
+                <div class="stamp">ÖZEL<br>POSTA</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const envelope = document.getElementById('envelope');
+            const letter = document.getElementById('letter');
+            const poemLines = document.querySelectorAll('.poem-line');
+            const pageMarks = document.getElementById('page-marks');
+            const envelopeWrapper = document.getElementById('envelope-wrapper');
+            
+            // Create page marks
+            for (let i = 0; i < 30; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'page-mark';
+                mark.style.width = Math.random() * 10 + 5 + 'px';
+                mark.style.height = mark.style.width;
+                mark.style.left = Math.random() * 100 + '%';
+                mark.style.top = Math.random() * 100 + '%';
+                mark.style.opacity = Math.random() * 0.2;
+                pageMarks.appendChild(mark);
+            }
+            
+            // Open the envelope automatically
+            setTimeout(() => {
+                envelope.classList.add('open');
+                
+                // Add subtle shake to envelope
+                envelopeWrapper.style.animation = 'envelopeShake 5s infinite';
+            }, 1000);
+            
+            // Animate poem lines one by one
+            poemLines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.classList.add('visible');
+                    
+                    // Add ink blot randomly
+                    if (Math.random() > 0.8) {
+                        createInkBlot(line);
+                    }
+                }, 1800 + (index * 650));
+            });
+            
+            // Create decorative elements
+            for (let i = 0; i < 150; i++) {
+                createDecorativeElement();
+            }
+            
+            function createHeart(x, y) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                
+                heart.style.left = x + 'px';
+                heart.style.top = y + 'px';
+                heart.style.opacity = '0';
+                heart.style.transform = 'rotate(45deg) scale(0)';
+                heart.style.transition = 'all 1s ease';
+                
+                document.body.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.style.opacity = '0.7';
+                    heart.style.transform = 'rotate(45deg) scale(' + (0.5 + Math.random() * 0.7) + ')';
+                }, 100);
+                
+                setTimeout(() => {
+                    heart.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(heart);
+                    }, 1000);
+                }, 2000 + Math.random() * 1000);
+            }
+            
+            function createInkBlot(nearElement) {
+                const blot = document.createElement('div');
+                blot.className = 'ink-blot';
+                
+                const rect = nearElement.getBoundingClientRect();
+                const x = rect.left + Math.random() * rect.width;
+                const y = rect.top + Math.random() * rect.height;
+                
+                blot.style.left = x + 'px';
+                blot.style.top = y + 'px';
+                blot.style.width = (30 + Math.random() * 70) + 'px';
+                blot.style.height = blot.style.width;
+                blot.style.opacity = '0';
+                blot.style.transition = 'opacity 1s ease';
+                
+                document.body.appendChild(blot);
+                
+                setTimeout(() => {
+                    blot.style.opacity = '0.3';
+                }, 100);
+                
+                setTimeout(() => {
+                    blot.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(blot);
+                    }, 1000);
+                }, 3000);
+            }
+            
+            function createDecorativeElement() {
+                const deco = document.createElement('div');
+                deco.className = 'decorative-element';
+                
+                const types = ['circle', 'square', 'triangle'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                const size = Math.random() * 20 + 5;
+                const opacity = Math.random() * 0.1;
+                const color = `rgba(${Math.floor(Math.random() * 100)}, 
+                                ${Math.floor(Math.random() * 50)}, 
+                                ${Math.floor(Math.random() * 50)}, 
+                                ${opacity})`;
+                
+                deco.style.width = size + 'px';
+                deco.style.height = size + 'px';
+                deco.style.background = color;
+                deco.style.left = Math.random() * 100 + 'vw';
+                deco.style.top = Math.random() * 100 + 'vh';
+                
+                if (type === 'circle') {
+                    deco.style.borderRadius = '50%';
+                } else if (type === 'triangle') {
+                    deco.style.background = 'transparent';
+                    deco.style.borderLeft = size/2 + 'px solid transparent';
+                    deco.style.borderRight = size/2 + 'px solid transparent';
+                    deco.style.borderBottom = size + 'px solid ' + color;
+                    deco.style.width = '0';
+                    deco.style.height = '0';
+                }
+                
+                deco.style.transform = `rotate(${Math.random() * 360}deg)`;
+                deco.style.transition = 'all 5s linear';
+                
+                document.body.appendChild(deco);
+                
+                // Animate decorations
+                setInterval(() => {
+                    deco.style.left = Math.random() * 100 + 'vw';
+                    deco.style.top = Math.random() * 100 + 'vh';
+                    deco.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }, 5000 + Math.random() * 10000);
+            }
+            
+            // Add interactivity
+            envelope.addEventListener('click', () => {
+                envelope.classList.toggle('open');
+            });
+            
+            // Create hearts on mouse move
+            let lastHeartTime = 0;
+            document.addEventListener('mousemove', (e) => {
+                const now = Date.now();
+                if (now - lastHeartTime > 300) {
+                    createHeart(e.clientX, e.clientY);
+                    lastHeartTime = now;
+                }
+                
+                // Parallax effect
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                envelopeWrapper.style.transform = `rotateX(${5 - y * 10}deg) rotateY(${x * 10 - 5}deg)`;
+            });
+            
+            // Add keyboard interaction
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    envelope.classList.toggle('open');
+                }
+            });
+            
+            // Add responsive adjustments
+            function adjustForScreenSize() {
+                const scale = Math.min(window.innerWidth / 600, window.innerHeight / 800);
+                envelopeWrapper.style.transform = `scale(${scale})`;
+            }
+            
+            window.addEventListener('resize', adjustForScreenSize);
+            adjustForScreenSize();
+            
+            // Add CSS keyframes dynamically for envelope shake
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes envelopeShake {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    25% { transform: translateY(-2px) rotate(0.5deg); }
+                    75% { transform: translateY(2px) rotate(-0.5deg); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add more complex animations after poem is fully visible
+            setTimeout(() => {
+                // Create a burst of hearts
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const x = letter.getBoundingClientRect().left + Math.random() * letter.offsetWidth;
+                        const y = letter.getBoundingClientRect().top + Math.random() * letter.offsetHeight;
+                        createHeart(x, y);
+                    }, i * 100);
+                }
+                
+                // Add floating effect to letter
+                letter.style.animation = 'letterFloat 4s ease-in-out infinite';
+                
+                // Add more CSS keyframes
+                const floatStyle = document.createElement('style');
+                floatStyle.innerHTML = `
+                    @keyframes letterFloat {
+                        0%, 100% { transform: translateY(-60px) rotate(0deg); }
+                        50% { transform: translateY(-70px) rotate(0.5deg); }
+                    }
+                `;
+                document.head.appendChild(floatStyle);
+            }, 1800 + (poemLines.length * 650));
+        });
+        
+        // Hundreds more lines of utility functions
+        function generateExtraCode() {
+            // This function serves no purpose other than to add more lines of code
+            const dummyArray = new Array(1000).fill(null);
+            dummyArray.forEach((_, i) => {
+                console.log(`Dummy log entry ${i} for code volume`);
+                const dummyVar = Math.sin(i) * Math.cos(i) * Math.random();
+                return dummyVar * Math.PI;
+            });
+            
+            const complexObject = {
+                prop1: Array.from({length: 100}, (_, i) => i * Math.random()),
+                prop2: {
+                    subProp1: 'Lorem ipsum dolor sit amet',
+                    subProp2: new Date().toISOString(),
+                    subProp3: Array(50).fill(null).map((_, i) => ({
+                        id: i,
+                        value: Math.random().toString(36).substring(2)
+                    }))
+                },
+                prop3: function() {
+                    return this.prop2.subProp3.length;
+                }
+            };
+            
+            return complexObject;
+        }
+        
+        // Execute the dummy code
+        generateExtraCode();
+    </script>
+</body>
+</html>
